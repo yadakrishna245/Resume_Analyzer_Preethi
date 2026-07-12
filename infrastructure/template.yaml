@@ -1,0 +1,394 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  AI Resume Analyzer - Full-stack serverless application
+  with Cognito auth, API Gateway, Lambda, DynamoDB, S3, and CloudFront.
+
+Parameters:
+  Environment:
+    Type: String
+    Default: prod
+    AllowedValues: [dev, staging, prod]
+    Description: Deployment environment
+
+  GroqApiKey:
+    Type: String
+    NoEcho: true
+    Description: Groq API key for AI inference
+
+  GeminiApiKey:
+    Type: String
+    NoEcho: true
+    Description: Google Gemini API key (fallback)
+
+  OpenRouterApiKey:
+    Type: String
+    NoEcho: true
+    Default: ''
+    Description: OpenRouter API key (second fallback)
+
+  DailyRequestLimit:
+    Type: Number
+    Default: 3
+    Description: Max AI requests per user per day
+
+Globals:
+  Function:
+    Runtime: nodejs20.x
+    Timeout: 30
+    MemorySize: 256
+    Architectures:
+      - arm64
+    Environment:
+      Variables:
+        ENVIRONMENT: !Ref Environment
+        TABLE_NAME: !Ref UserDataTable
+        USER_POOL_ID: !Ref CognitoUserPool
+        REGION: !Ref AWS::Region
+
+Resources:
+  # S3 Bucket - Static Site Hosting
+  WebsiteBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'resume-analyzer-${Environment}-${AWS::AccountId}'
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      VersioningConfiguration:
+        Status: Enabled
+      LifecycleConfiguration:
+        Rules:
+          - Id: DeleteOldVersions
+            Status: Enabled
+            NoncurrentVersionExpiration:
+              NoncurrentDays: 30
+      Tags:
+        - Key: Project
+          Value: ResumeAnalyzer
+
+  WebsiteBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref WebsiteBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AllowCloudFrontOAC
+            Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action: s3:GetObject
+            Resource: !Sub '${WebsiteBucket.Arn}/*'
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub 'arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}'
+
+  # CloudFront Distribution with OAC
+  CloudFrontOAC:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub 'resume-analyzer-oac-${Environment}'
+        Description: OAC for Resume Analyzer S3 bucket
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        Comment: !Sub 'Resume Analyzer (${Environment})'
+        DefaultRootObject: index.html
+        HttpVersion: http2and3
+        PriceClass: PriceClass_100
+        Origins:
+          - Id: S3Origin
+            DomainName: !GetAtt WebsiteBucket.RegionalDomainName
+            OriginAccessControlId: !Ref CloudFrontOAC
+            S3OriginConfig:
+              OriginAccessIdentity: ''
+        DefaultCacheBehavior:
+          TargetOriginId: S3Origin
+          ViewerProtocolPolicy: redirect-to-https
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
+          Compress: true
+          AllowedMethods: [GET, HEAD, OPTIONS]
+          CachedMethods: [GET, HEAD]
+        CustomErrorResponses:
+          - ErrorCode: 403
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+            ErrorCachingMinTTL: 10
+          - ErrorCode: 404
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+            ErrorCachingMinTTL: 10
+        ViewerCertificate:
+          CloudFrontDefaultCertificate: true
+
+  # Cognito User Pool
+  CognitoUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub 'resume-analyzer-users-${Environment}'
+      UsernameAttributes:
+        - email
+      AutoVerifiedAttributes:
+        - email
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireLowercase: true
+          RequireUppercase: true
+          RequireNumbers: true
+          RequireSymbols: false
+          TemporaryPasswordValidityDays: 7
+      MfaConfiguration: OPTIONAL
+      EnabledMfas:
+        - SOFTWARE_TOKEN_MFA
+      Schema:
+        - Name: email
+          Required: true
+          Mutable: true
+          AttributeDataType: String
+        - Name: name
+          Required: false
+          Mutable: true
+          AttributeDataType: String
+      EmailConfiguration:
+        EmailSendingAccount: COGNITO_DEFAULT
+      AccountRecoverySetting:
+        RecoveryMechanisms:
+          - Name: verified_email
+            Priority: 1
+      UserPoolAddOns:
+        AdvancedSecurityMode: AUDIT
+      DeletionProtection: ACTIVE
+
+  CognitoUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Sub 'resume-analyzer-spa-${Environment}'
+      UserPoolId: !Ref CognitoUserPool
+      GenerateSecret: false
+      ExplicitAuthFlows:
+        - ALLOW_USER_SRP_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+      SupportedIdentityProviders:
+        - COGNITO
+      PreventUserExistenceErrors: ENABLED
+      AccessTokenValidity: 1
+      IdTokenValidity: 1
+      RefreshTokenValidity: 30
+      TokenValidityUnits:
+        AccessToken: hours
+        IdToken: hours
+        RefreshToken: days
+      AllowedOAuthFlows:
+        - implicit
+      AllowedOAuthScopes:
+        - email
+        - openid
+        - profile
+      AllowedOAuthFlowsUserPoolClient: true
+      CallbackURLs:
+        - http://localhost:5173
+        - !Sub 'https://${CloudFrontDistribution.DomainName}'
+      LogoutURLs:
+        - http://localhost:5173
+        - !Sub 'https://${CloudFrontDistribution.DomainName}'
+
+  # DynamoDB Table
+  UserDataTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub 'resume-analyzer-users-${Environment}'
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+        - AttributeName: analysisId
+          AttributeType: S
+        - AttributeName: createdAt
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+        - AttributeName: analysisId
+          KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: UserDateIndex
+          KeySchema:
+            - AttributeName: userId
+              KeyType: HASH
+            - AttributeName: createdAt
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+      SSESpecification:
+        SSEEnabled: true
+        SSEType: KMS
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+
+  # API Gateway
+  ApiGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Sub 'resume-analyzer-api-${Environment}'
+      StageName: !Ref Environment
+      Cors:
+        AllowMethods: "'GET,POST,DELETE,OPTIONS'"
+        AllowHeaders: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key'"
+        AllowOrigin: "'*'"
+        MaxAge: "'86400'"
+      Auth:
+        DefaultAuthorizer: CognitoAuthorizer
+        Authorizers:
+          CognitoAuthorizer:
+            UserPoolArn: !GetAtt CognitoUserPool.Arn
+            Identity:
+              Header: Authorization
+      MethodSettings:
+        - ResourcePath: '/*'
+          HttpMethod: '*'
+          ThrottlingBurstLimit: 10
+          ThrottlingRateLimit: 5
+      AccessLogSetting:
+        DestinationArn: !GetAtt ApiAccessLogGroup.Arn
+        Format: '{"requestId":"$context.requestId","ip":"$context.identity.sourceIp","requestTime":"$context.requestTime","httpMethod":"$context.httpMethod","resourcePath":"$context.resourcePath","status":"$context.status"}'
+
+  ApiAccessLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/apigateway/resume-analyzer-${Environment}'
+      RetentionInDays: 14
+
+  # Lambda - AI Proxy
+  AiProxyFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'resume-analyzer-ai-proxy-${Environment}'
+      Handler: index.handler
+      CodeUri: ../backend/lambda/aiProxy/
+      Description: Proxies AI requests with rate limiting and multi-provider fallback
+      MemorySize: 256
+      Timeout: 60
+      Environment:
+        Variables:
+          GROQ_API_KEY: !Ref GroqApiKey
+          GEMINI_API_KEY: !Ref GeminiApiKey
+          OPENROUTER_API_KEY: !Ref OpenRouterApiKey
+          DAILY_REQUEST_LIMIT: !Ref DailyRequestLimit
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UserDataTable
+      Events:
+        AnalyzeResume:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGateway
+            Path: /analyze
+            Method: POST
+
+  AiProxyLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/resume-analyzer-ai-proxy-${Environment}'
+      RetentionInDays: 14
+
+  # Lambda - User History
+  UserHistoryFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'resume-analyzer-history-${Environment}'
+      Handler: index.handler
+      CodeUri: ../backend/lambda/userHistory/
+      Description: Manages user analysis history (CRUD)
+      MemorySize: 128
+      Timeout: 10
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UserDataTable
+      Events:
+        GetHistory:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGateway
+            Path: /history
+            Method: GET
+        SaveHistory:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGateway
+            Path: /history
+            Method: POST
+        DeleteHistory:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGateway
+            Path: /history/{id}
+            Method: DELETE
+
+  UserHistoryLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/resume-analyzer-history-${Environment}'
+      RetentionInDays: 14
+
+Outputs:
+  CloudFrontURL:
+    Description: CloudFront distribution URL (frontend)
+    Value: !Sub 'https://${CloudFrontDistribution.DomainName}'
+    Export:
+      Name: !Sub '${AWS::StackName}-CloudFrontURL'
+
+  CognitoUserPoolId:
+    Description: Cognito User Pool ID
+    Value: !Ref CognitoUserPool
+    Export:
+      Name: !Sub '${AWS::StackName}-UserPoolId'
+
+  CognitoClientId:
+    Description: Cognito User Pool Client ID
+    Value: !Ref CognitoUserPoolClient
+    Export:
+      Name: !Sub '${AWS::StackName}-ClientId'
+
+  ApiGatewayUrl:
+    Description: API Gateway endpoint URL
+    Value: !Sub 'https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${Environment}'
+    Export:
+      Name: !Sub '${AWS::StackName}-ApiUrl'
+
+  WebsiteBucketName:
+    Description: S3 bucket name for frontend assets
+    Value: !Ref WebsiteBucket
+    Export:
+      Name: !Sub '${AWS::StackName}-BucketName'
+
+  CloudFrontDistributionId:
+    Description: CloudFront distribution ID
+    Value: !Ref CloudFrontDistribution
+    Export:
+      Name: !Sub '${AWS::StackName}-DistributionId'
+
+  UserDataTableName:
+    Description: DynamoDB table name
+    Value: !Ref UserDataTable
+
+  AWSRegion:
+    Description: AWS Region
+    Value: !Ref AWS::Region

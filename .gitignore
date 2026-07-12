@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Environment files
+.env
+.env.production
+.env.local
+.env.*.local
+
+# AWS SAM
+.aws-sam/
+
+# Deployment output
+deployment-output.json
+
+# Archives
+*.zip
+
+# OS files
+.DS_Store
+Thumbs.db

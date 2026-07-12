@@ -1,0 +1,84 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: AI Resume Analyzer - Cognito User Pool for authentication
+
+Resources:
+  # Cognito User Pool
+  CognitoUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: resume-analyzer-users
+      AutoVerifiedAttributes:
+        - email
+      UsernameAttributes:
+        - email
+      MfaConfiguration: OPTIONAL
+      EnabledMfas:
+        - SOFTWARE_TOKEN_MFA
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireLowercase: true
+          RequireUppercase: true
+          RequireNumbers: true
+          RequireSymbols: false
+      Schema:
+        - Name: name
+          AttributeDataType: String
+          Mutable: true
+          Required: false
+        - Name: email
+          AttributeDataType: String
+          Mutable: true
+          Required: true
+      AccountRecoverySetting:
+        RecoveryMechanisms:
+          - Name: verified_email
+            Priority: 1
+      EmailConfiguration:
+        EmailSendingAccount: COGNITO_DEFAULT
+
+  # Cognito User Pool Client (SPA - no client secret)
+  CognitoUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: resume-analyzer-web
+      UserPoolId: !Ref CognitoUserPool
+      GenerateSecret: false
+      ExplicitAuthFlows:
+        - ALLOW_USER_SRP_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+        - ALLOW_USER_PASSWORD_AUTH
+      PreventUserExistenceErrors: ENABLED
+      SupportedIdentityProviders:
+        - COGNITO
+      AllowedOAuthFlows:
+        - implicit
+      AllowedOAuthScopes:
+        - email
+        - openid
+        - profile
+      AllowedOAuthFlowsUserPoolClient: true
+      CallbackURLs:
+        - https://d2kbrlih56o9j8.cloudfront.net
+        - http://localhost:3000
+      LogoutURLs:
+        - https://d2kbrlih56o9j8.cloudfront.net
+        - http://localhost:3000
+      AccessTokenValidity: 1
+      IdTokenValidity: 1
+      RefreshTokenValidity: 30
+      TokenValidityUnits:
+        AccessToken: hours
+        IdToken: hours
+        RefreshToken: days
+
+Outputs:
+  UserPoolId:
+    Value: !Ref CognitoUserPool
+    Description: Cognito User Pool ID
+  UserPoolClientId:
+    Value: !Ref CognitoUserPoolClient
+    Description: Cognito User Pool Client ID
+  UserPoolRegion:
+    Value: !Ref AWS::Region
+    Description: AWS Region

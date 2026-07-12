@@ -1,0 +1,121 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: AI Resume Analyzer - CORS Proxy API for AI providers
+
+Resources:
+  # Lambda Function - AI CORS Proxy
+  AIProxyFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: resume-analyzer-ai-proxy
+      Runtime: nodejs20.x
+      Handler: index.handler
+      Timeout: 60
+      MemorySize: 256
+      Architectures:
+        - arm64
+      Code:
+        ZipFile: |
+          const handler = async (event) => {
+            const headers = {
+              'Access-Control-Allow-Origin': '*',
+              'Access-Control-Allow-Headers': 'Content-Type,Authorization,X-Provider,X-Model,X-Base-URL',
+              'Access-Control-Allow-Methods': 'POST,OPTIONS',
+              'Content-Type': 'application/json'
+            };
+            if (event.requestContext?.http?.method === 'OPTIONS') {
+              return { statusCode: 200, headers, body: '' };
+            }
+            try {
+              const body = JSON.parse(event.body || '{}');
+              const h = event.headers || {};
+              const provider = h['x-provider'] || '';
+              const apiKey = h['authorization'] || '';
+              const model = h['x-model'] || '';
+              const baseUrl = h['x-base-url'] || '';
+              if (!apiKey || !body.messages) {
+                return { statusCode: 400, headers, body: JSON.stringify({ error: 'Missing authorization or messages' }) };
+              }
+              let targetUrl, reqHeaders, reqBody;
+              if (provider === 'gemini') {
+                const key = apiKey.replace('Bearer ', '');
+                const m = model || 'gemini-2.0-flash';
+                targetUrl = `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${key}`;
+                reqHeaders = { 'Content-Type': 'application/json' };
+                const sysMsg = body.messages.find(x => x.role === 'system');
+                const otherMsgs = body.messages.filter(x => x.role !== 'system');
+                reqBody = JSON.stringify({ contents: otherMsgs.map(x => ({ role: x.role === 'assistant' ? 'model' : 'user', parts: [{ text: x.content }] })), systemInstruction: sysMsg ? { parts: [{ text: sysMsg.content }] } : undefined, generationConfig: { temperature: body.temperature || 0.7, maxOutputTokens: body.max_tokens || 2048 } });
+              } else if (provider === 'anthropic') {
+                const sysMsg = body.messages.find(x => x.role === 'system');
+                const otherMsgs = body.messages.filter(x => x.role !== 'system');
+                targetUrl = 'https://api.anthropic.com/v1/messages';
+                reqHeaders = { 'Content-Type': 'application/json', 'x-api-key': apiKey.replace('Bearer ', ''), 'anthropic-version': '2023-06-01' };
+                reqBody = JSON.stringify({ model: model || 'claude-sonnet-4-20250514', max_tokens: body.max_tokens || 2048, system: sysMsg?.content || '', messages: otherMsgs });
+              } else {
+                const url = baseUrl || 'https://api.groq.com/openai/v1';
+                targetUrl = `${url}/chat/completions`;
+                reqHeaders = { 'Content-Type': 'application/json', 'Authorization': apiKey };
+                if (provider === 'openrouter') { reqHeaders['HTTP-Referer'] = 'https://ai-resume-analyzer.app'; reqHeaders['X-Title'] = 'AI Resume Analyzer'; }
+                reqBody = JSON.stringify({ model: model || 'llama-3.3-70b-versatile', messages: body.messages, temperature: body.temperature || 0.7, max_tokens: body.max_tokens || 2048 });
+              }
+              const res = await fetch(targetUrl, { method: 'POST', headers: reqHeaders, body: reqBody });
+              const data = await res.text();
+              if (!res.ok) { return { statusCode: res.status, headers, body: data }; }
+              const parsed = JSON.parse(data);
+              let content = '';
+              if (provider === 'gemini') { content = parsed.candidates?.[0]?.content?.parts?.[0]?.text || ''; }
+              else if (provider === 'anthropic') { content = parsed.content?.[0]?.text || ''; }
+              else { content = parsed.choices?.[0]?.message?.content || ''; }
+              return { statusCode: 200, headers, body: JSON.stringify({ choices: [{ message: { content } }], usage: parsed.usage || null }) };
+            } catch (err) {
+              return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };
+            }
+          };
+          module.exports = { handler };
+      Role: !GetAtt LambdaRole.Arn
+
+  # IAM Role for Lambda
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+  # Lambda Function URL (no API Gateway needed - simpler and free)
+  AIProxyFunctionUrl:
+    Type: AWS::Lambda::Url
+    Properties:
+      AuthType: NONE
+      TargetFunctionArn: !Ref AIProxyFunction
+      Cors:
+        AllowOrigins:
+          - '*'
+        AllowMethods:
+          - POST
+          - OPTIONS
+        AllowHeaders:
+          - Content-Type
+          - Authorization
+          - X-Provider
+          - X-Model
+          - X-Base-URL
+
+  # Permission for public access to Function URL
+  AIProxyPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref AIProxyFunction
+      Action: lambda:InvokeFunctionUrl
+      Principal: '*'
+      FunctionUrlAuthType: NONE
+
+Outputs:
+  ProxyURL:
+    Value: !GetAtt AIProxyFunctionUrl.FunctionUrl
+    Description: AI Proxy Lambda Function URL

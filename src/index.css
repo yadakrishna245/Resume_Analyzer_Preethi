@@ -1,0 +1,172 @@
+/* Google Fonts — must be first */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+/* Tailwind base */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   NexuCV — Premium Dark Theme
+   Deep space navy + indigo/violet brand identity
+   ============================================ */
+
+@layer base {
+  * { box-sizing: border-box; }
+
+  body {
+    @apply bg-navy-900 text-gray-100 font-sans antialiased;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    background-image:
+      radial-gradient(ellipse 80% 60% at 50% -10%, rgba(99,102,241,0.12) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 30% at 80% 60%, rgba(139,92,246,0.06) 0%, transparent 60%);
+    background-attachment: fixed;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { @apply bg-navy-900; }
+  ::-webkit-scrollbar-thumb { @apply bg-navy-500 rounded-full; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-brand-indigo/60; }
+
+  /* Selection */
+  ::selection { @apply bg-brand-indigo/30 text-white; }
+}
+
+@layer components {
+
+  /* ---- Cards ---- */
+  .card {
+    @apply bg-navy-800 border border-navy-600 rounded-2xl p-6 shadow-card transition-all duration-300;
+    background-image: linear-gradient(135deg, rgba(99,102,241,0.04) 0%, rgba(139,92,246,0.02) 100%);
+    box-shadow: 0 4px 32px rgba(0,0,0,0.40), 0 1px 0 rgba(255,255,255,0.05) inset;
+  }
+  .card:hover {
+    @apply border-navy-500;
+    box-shadow: 0 8px 48px rgba(99,102,241,0.10), 0 1px 0 rgba(255,255,255,0.05) inset;
+  }
+
+  /* Glass card */
+  .card-glass {
+    background: rgba(11,20,37,0.70);
+    backdrop-filter: blur(20px);
+    @apply border border-white/[0.07] rounded-2xl p-6 shadow-card transition-all duration-300;
+  }
+  .card-glass:hover {
+    background: rgba(11,20,37,0.80);
+    @apply border-white/[0.12];
+  }
+
+  /* ---- Buttons ---- */
+  .btn-primary {
+    @apply bg-accent-orange hover:bg-accent-gold text-black font-bold
+           px-6 py-3 rounded-xl transition-all duration-200
+           shadow-amber hover:shadow-lg active:scale-95
+           disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply bg-navy-700 hover:bg-navy-600 text-gray-200 font-semibold
+           px-6 py-3 rounded-xl border border-navy-500 hover:border-navy-400
+           transition-all duration-200 active:scale-95
+           disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+
+  .btn-outline {
+    @apply bg-transparent border border-accent-orange/60 text-accent-orange/90
+           hover:bg-accent-orange/10 hover:border-accent-orange font-medium
+           px-4 py-2 rounded-xl transition-all duration-200 active:scale-95 flex items-center gap-2;
+  }
+
+  .btn-brand {
+    @apply font-bold px-6 py-3 rounded-xl transition-all duration-200
+           active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed text-white;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    box-shadow: 0 4px 24px rgba(99,102,241,0.30);
+  }
+  .btn-brand:hover {
+    box-shadow: 0 6px 32px rgba(99,102,241,0.50);
+    filter: brightness(1.1);
+  }
+
+  /* ---- Inputs ---- */
+  .input-field {
+    @apply w-full bg-navy-900 border border-navy-600 rounded-xl px-4 py-3
+           text-gray-100 placeholder-gray-500
+           focus:outline-none focus:ring-2 focus:ring-brand-indigo/50 focus:border-brand-indigo
+           transition-all duration-200;
+  }
+
+  /* ---- Tab bar ---- */
+  .tab-active   { @apply text-accent-orange border-b-2 border-accent-orange font-semibold; }
+  .tab-inactive { @apply text-gray-400 hover:text-gray-200 border-b-2 border-transparent transition-colors duration-200; }
+
+  /* ---- Tags ---- */
+  .tag-success { @apply inline-flex items-center gap-1 bg-accent-green/10 text-accent-green border border-accent-green/30 rounded-full px-3 py-1 text-xs font-medium; }
+  .tag-error   { @apply inline-flex items-center gap-1 bg-accent-red/10   text-accent-red   border border-accent-red/30   rounded-full px-3 py-1 text-xs font-medium; }
+  .tag-warning { @apply inline-flex items-center gap-1 bg-accent-yellow/10 text-accent-yellow border border-accent-yellow/30 rounded-full px-3 py-1 text-xs font-medium; }
+
+  /* ---- Progress bar ---- */
+  .progress-bar      { @apply h-2 bg-navy-600 rounded-full overflow-hidden; }
+  .progress-bar-fill { @apply h-full rounded-full transition-all duration-700 ease-out; }
+
+  /* ---- Brand gradient text ---- */
+  .text-brand-gradient {
+    background: linear-gradient(135deg, #818cf8 0%, #a78bfa 50%, #c084fc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ---- Stat card ---- */
+  .stat-card {
+    @apply flex flex-col items-center gap-1 p-5 rounded-2xl border border-navy-600/60 transition-all duration-300;
+    background: rgba(11,20,37,0.50);
+    backdrop-filter: blur(12px);
+  }
+  .stat-card:hover {
+    @apply border-brand-indigo/40;
+    box-shadow: 0 0 24px rgba(99,102,241,0.12);
+  }
+
+  /* ---- Feature badge ---- */
+  .feature-pill {
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border transition-all duration-200;
+    background: rgba(99,102,241,0.08);
+    @apply border-brand-indigo/20 text-brand-indigo hover:bg-brand-indigo/15 hover:border-brand-indigo/40;
+  }
+
+  /* ---- Glow dot ---- */
+  .glow-dot {
+    @apply w-2 h-2 rounded-full;
+    background: #10b981;
+    box-shadow: 0 0 8px rgba(16,185,129,0.80);
+  }
+  .glow-dot-amber {
+    @apply w-2 h-2 rounded-full;
+    background: #f59e0b;
+    box-shadow: 0 0 8px rgba(245,158,11,0.80);
+  }
+
+  /* ---- Divider ---- */
+  .divider {
+    @apply border-t border-navy-600/60;
+  }
+
+  /* ---- Animate appear ---- */
+  .animate-appear { animation: fadeIn 0.4s ease-out forwards; }
+}
+
+/* Keyframes */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Score ring pulse */
+@keyframes ringPulse {
+  0%   { stroke-opacity: 1; }
+  50%  { stroke-opacity: 0.7; }
+  100% { stroke-opacity: 1; }
+}
+.score-ring-animate { animation: ringPulse 2s ease-in-out infinite; }
