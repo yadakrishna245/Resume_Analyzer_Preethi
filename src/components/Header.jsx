@@ -2,7 +2,7 @@
  * Header.jsx — NexuCV Premium Navigation
  */
 import React, { useState, useContext } from 'react';
-import { Key, Menu, X, User, LogOut, Sparkles } from 'lucide-react';
+import { Key, Menu, X, User, LogOut, Sparkles, Users } from 'lucide-react';
 import { AuthContext } from '../App.jsx';
 
 /** NexuCV inline SVG logo */
@@ -63,6 +63,15 @@ function Header() {
 
             {/* ── Desktop nav ── */}
             <nav className="hidden md:flex items-center gap-2">
+              {/* Recruiter Mode */}
+              <a
+                href="/recruiter"
+                className="flex items-center gap-2 text-gray-300 hover:text-white text-sm font-medium px-3 py-2 rounded-xl hover:bg-navy-700 transition-all duration-200"
+              >
+                <Users size={15} />
+                Recruiter Mode
+              </a>
+
               {/* API key guide */}
               <a
                 href="https://console.groq.com/keys"
@@ -114,6 +123,12 @@ function Header() {
         {mobileOpen && (
           <div className="md:hidden border-t border-navy-600/50 animate-slide-down">
             <div className="px-4 py-4 space-y-2">
+              <a
+                href="/recruiter"
+                className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:text-white hover:bg-navy-700 rounded-xl text-sm"
+              >
+                <Users size={16} /> Recruiter Mode
+              </a>
               <a
                 href="https://console.groq.com/keys"
                 target="_blank"

@@ -12,6 +12,7 @@ import Footer from './components/Footer.jsx';
 import AISettings from './components/AISettings.jsx';
 import ResumeUpload from './components/ResumeUpload.jsx';
 import ResultsTabs from './components/ResultsTabs.jsx';
+import BulkScreening from './components/BulkScreening.jsx';
 import awsConfig from './config/awsConfig.js';
 
 // ─── Global Context ────────────────────────────────────────────────────────────
@@ -389,6 +390,7 @@ function App() {
                 <Route path="/"       element={<HomePage  />} />
                 <Route path="/login"  element={<LoginPage />} />
                 <Route path="/signup" element={<LoginPage />} />
+                <Route path="/recruiter" element={<BulkScreening />} />
               </Routes>
             </main>
             <Footer />
