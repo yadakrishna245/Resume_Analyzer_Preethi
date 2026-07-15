@@ -804,8 +804,6 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
 
 **Preethi Prasanna**
 
-[![GitHub](https://img.shields.io/badge/GitHub-yadakrishna245-181717?style=for-the-badge&logo=github)](https://github.com/yadakrishna245)
-
 Developed by Preethi | Built with ❤️ using React, AWS, and AI
 
 *If this project helped you, consider giving it a ⭐!*
