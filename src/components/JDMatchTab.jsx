@@ -29,6 +29,108 @@ function JDMatchTab({ data, resumeText, targetRole }) {
   const [compareMode, setCompareMode] = useState(''); // 'quick' or 'ai'
   const [error, setError] = useState('');
 
+  // Pre-loaded sample JDs for quick testing
+  const SAMPLE_JDS = {
+    'wipro-ta': {
+      label: '📋 Wipro - Talent Acquisition',
+      text: `Job Title: Talent Acquisition Specialist
+Company: Wipro Limited
+Location: Bengaluru, India
+Experience: 3-8 years
+
+About the Role:
+We are looking for a Talent Acquisition Specialist to join our HR team at Wipro. The ideal candidate will manage end-to-end recruitment for technology and non-technology roles, build strong talent pipelines, and deliver a world-class candidate experience.
+
+Key Responsibilities:
+- Manage full-cycle recruitment including sourcing, screening, interviewing, offer management, and onboarding
+- Partner with hiring managers to understand role requirements, team dynamics, and hiring priorities
+- Source candidates through multiple channels including LinkedIn Recruiter, Naukri, employee referrals, and recruitment drives
+- Conduct initial phone screens and assess candidates for cultural fit and role alignment
+- Coordinate interview scheduling across multiple panels and time zones
+- Manage offer negotiations, salary benchmarking, and compensation discussions
+- Drive campus recruitment and lateral hiring programs
+- Maintain recruitment MIS, dashboards, and weekly hiring reports
+- Ensure positive candidate experience throughout the hiring lifecycle
+- Support employer branding initiatives and recruitment marketing campaigns
+- Handle volume hiring for large project ramp-ups with tight timelines
+- Ensure compliance with hiring policies, diversity goals, and documentation standards
+- Manage vendor relationships with recruitment agencies and job portals
+- Conduct background verification coordination and joining formalities
+- Support employee onboarding and induction programs
+
+Required Skills & Qualifications:
+- 3-8 years of experience in Talent Acquisition / Recruitment (IT services preferred)
+- Strong sourcing skills using LinkedIn Recruiter, Naukri, Boolean search
+- Experience with ATS tools (Workday, Taleo, SuccessFactors, or similar)
+- Excellent communication and stakeholder management skills
+- Experience in volume hiring and lateral hiring
+- Knowledge of recruitment metrics (Time to Fill, Cost per Hire, Source of Hire)
+- Strong MS Office skills (Excel, PowerPoint)
+- Ability to manage multiple requisitions simultaneously
+- Experience in campus recruitment and walk-in drives
+- Understanding of IT roles and technology terminology is a plus
+
+Preferred Qualifications:
+- MBA/PGDM in HR or equivalent
+- SHRM-CP or equivalent HR certification
+- Experience with employer branding and recruitment marketing
+- Knowledge of labor laws and HR compliance
+- Prior experience in IT/ITES talent acquisition
+
+What We Offer:
+- Competitive compensation and benefits
+- Learning and development opportunities
+- Inclusive and diverse work environment
+- Career growth in a Fortune 500 company`
+    },
+    'wipro-hr-recruiter': {
+      label: '📋 Wipro - HR Recruiter',
+      text: `Job Title: HR Recruiter
+Company: Wipro Limited
+Location: Bengaluru, India
+Experience: 2-5 years
+
+About the Role:
+Wipro is hiring an HR Recruiter to support our growing talent needs. You will work closely with business teams to fulfill hiring requirements, manage candidate pipelines, and ensure smooth onboarding processes.
+
+Key Responsibilities:
+- Source and screen candidates for various IT and non-IT positions
+- Coordinate end-to-end recruitment activities from job posting to offer rollout
+- Schedule and coordinate interviews with hiring managers and interview panels
+- Manage candidate communication and provide timely status updates
+- Conduct reference checks and background verification processes
+- Support employee onboarding, induction, and joining formalities
+- Maintain accurate records in HRIS/ATS systems
+- Generate recruitment reports and MIS for management review
+- Coordinate with recruitment agencies and manage vendor relationships
+- Support employee engagement activities and HR administration
+- Assist in organizing recruitment drives and campus hiring events
+- Ensure adherence to company policies and HR compliance standards
+
+Required Skills:
+- 2-5 years in HR recruitment or talent acquisition
+- Proficiency in job portals (Naukri, LinkedIn, Indeed)
+- Good communication and interpersonal skills
+- MS Office proficiency (Excel, Word, PowerPoint)
+- Experience with HRIS or ATS platforms
+- Ability to handle multiple roles and priorities
+- Knowledge of employee onboarding processes
+- Team player with strong organizational skills
+
+Preferred:
+- MBA in HR / PGDM in HRM
+- Experience in IT recruitment
+- Knowledge of HRMS tools (GreytHR, Darwin Box, SAP HR)
+- Understanding of labor compliance and statutory requirements`
+    }
+  };
+
+  const loadSampleJD = (key) => {
+    setJobDescription(SAMPLE_JDS[key].text);
+    setError('');
+    setMatchResult(null);
+  };
+
   /**
    * Quick keyword match using the REAL jdMatcher engine
    * Runs entirely client-side, no API key needed
@@ -186,6 +288,21 @@ function JDMatchTab({ data, resumeText, targetRole }) {
         <p className="text-gray-300 text-sm mb-3">
           Paste a job description below to see how well your resume matches it.
         </p>
+
+        {/* Sample JD Quick Load Buttons */}
+        <div className="flex flex-wrap gap-2 mb-3">
+          <span className="text-xs text-gray-500 self-center">Load sample JD:</span>
+          {Object.entries(SAMPLE_JDS).map(([key, { label }]) => (
+            <button
+              key={key}
+              onClick={() => loadSampleJD(key)}
+              className="text-xs px-3 py-1.5 rounded-full border border-brand-indigo/30 text-brand-indigo hover:bg-brand-indigo/10 transition-colors"
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
         <textarea
           value={jobDescription}
           onChange={(e) => setJobDescription(e.target.value)}

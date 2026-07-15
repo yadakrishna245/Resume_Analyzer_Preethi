@@ -312,6 +312,98 @@ export const ROLE_KEYWORDS = {
     ]
   },
 
+  'talent-acquisition': {
+    title: 'Talent Acquisition Specialist',
+    slug: 'talent-acquisition',
+    core_skills: [
+      'full-cycle recruiting', 'talent acquisition', 'sourcing', 'screening',
+      'candidate engagement', 'stakeholder management', 'employer branding',
+      'recruitment strategy', 'workforce planning', 'talent pipeline',
+      'headhunting', 'campus recruitment', 'lateral hiring', 'volume hiring',
+      'offer management', 'salary negotiation', 'candidate experience',
+      'diversity hiring', 'employee referral program', 'recruitment marketing',
+      'boolean search', 'talent mapping', 'market intelligence',
+      'interview coordination', 'onboarding', 'background verification'
+    ],
+    tools: [
+      'Naukri', 'LinkedIn Recruiter', 'Indeed', 'Monster', 'Glassdoor',
+      'Workday', 'Taleo', 'iCIMS', 'Greenhouse', 'SuccessFactors',
+      'SAP HR', 'BambooHR', 'ATS', 'HRIS', 'MS Office', 'Excel',
+      'Zoho Recruit', 'SmartRecruiters', 'JobDiva', 'Bullhorn'
+    ],
+    practices: [
+      'STAR interview method', 'competency-based interviewing',
+      'structured interviews', 'behavioral interviewing',
+      'talent pool management', 'passive candidate sourcing',
+      'data-driven recruiting', 'recruitment analytics',
+      'hiring manager partnership', 'employer value proposition',
+      'candidate relationship management', 'social recruiting',
+      'recruitment compliance', 'equal opportunity hiring',
+      'agile recruitment', 'recruitment process outsourcing'
+    ],
+    cloud_services: [
+      'LinkedIn Talent Solutions', 'LinkedIn Insights', 'Naukri RMS',
+      'Indeed Sponsored Jobs', 'Glassdoor Employer Account',
+      'Google Jobs', 'HackerRank', 'HackerEarth', 'Codility',
+      'Microsoft Teams', 'Zoom', 'Google Meet', 'Calendly',
+      'DocuSign', 'Power BI', 'Google Analytics'
+    ],
+    certifications: [
+      'SHRM-CP', 'SHRM-SCP', 'PHR', 'SPHR',
+      'AIRS Certified Recruiter', 'LinkedIn Certified Recruiter',
+      'Talent Acquisition Strategist (TAS)',
+      'Certified Internet Recruiter (CIR)',
+      'NAPS Certified Personnel Consultant',
+      'CIPD Level 5', 'CIPD Level 7'
+    ]
+  },
+
+  'hr-recruiter': {
+    title: 'HR Recruiter',
+    slug: 'hr-recruiter',
+    core_skills: [
+      'recruitment', 'talent acquisition', 'sourcing', 'screening',
+      'employee onboarding', 'induction', 'HR administration',
+      'employee engagement', 'team management', 'vendor management',
+      'cross-functional collaboration', 'stakeholder management',
+      'training and development', 'compliance', 'employee retention',
+      'interview scheduling', 'candidate assessment', 'reference checks',
+      'HR operations', 'performance management', 'exit management',
+      'employee documentation', 'background verification', 'MIS reporting',
+      'joining formalities', 'HR policies'
+    ],
+    tools: [
+      'Naukri', 'LinkedIn', 'Indeed', 'Monster', 'MS Office',
+      'Excel', 'PowerPoint', 'Workday', 'SuccessFactors', 'SAP HR',
+      'BambooHR', 'Zoho People', 'GreytHR', 'Darwin Box',
+      'Keka HR', 'ATS', 'HRIS', 'Google Suite', 'Outlook'
+    ],
+    practices: [
+      'structured interviews', 'behavioral interviewing',
+      'competency mapping', 'manpower planning', 'succession planning',
+      'employee lifecycle management', 'HR compliance', 'labor laws',
+      'compensation benchmarking', 'employee surveys', 'exit interviews',
+      'diversity and inclusion', 'grievance handling',
+      'attendance management', 'leave management', 'payroll coordination'
+    ],
+    cloud_services: [
+      'LinkedIn Recruiter', 'Naukri RMS', 'Indeed',
+      'Google Meet', 'Microsoft Teams', 'Zoom',
+      'Slack', 'HRMS portals', 'DocuSign',
+      'Calendly', 'Google Forms', 'MS Forms',
+      'SharePoint', 'Power BI', 'Google Sheets'
+    ],
+    certifications: [
+      'SHRM-CP', 'PHR', 'CIPD Level 5',
+      'Certified HR Professional',
+      'MBA in HR', 'PGDM in HR',
+      'Diploma in HR Management',
+      'AIRS Certified Recruiter',
+      'TA Certification from NIPM',
+      'LinkedIn Learning HR Certifications'
+    ]
+  },
+
   'platform-engineer': {
     title: 'Platform Engineer',
     slug: 'platform-engineer',

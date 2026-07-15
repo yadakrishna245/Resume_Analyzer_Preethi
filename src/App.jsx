@@ -54,13 +54,13 @@ function Hero() {
       <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-brand-indigo/30 text-sm font-medium mb-6"
            style={{ background: 'rgba(99,102,241,0.10)', color: '#a5b4fc' }}>
         <Sparkles size={14} />
-        AI-Powered Resume Intelligence
+        Preethi's Resume Intelligence Tool
         <span className="w-1.5 h-1.5 rounded-full bg-accent-green" style={{ boxShadow: '0 0 6px #10b981' }} />
       </div>
 
       {/* Main headline */}
       <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white mb-4 leading-[1.1]">
-        Land Your Dream Job
+        Crack Your TA Interview
         <span className="block mt-1">
           with{' '}
           <span className="text-brand-gradient">NexuCV</span>
@@ -69,9 +69,9 @@ function Hero() {
 
       {/* Subline */}
       <p className="text-lg text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-        Instant ATS score, AI-powered feedback, and job description matching —
-        all running privately in your browser.{' '}
-        <span className="text-white font-medium">Your resume never leaves your device.</span>
+        Tailored for <span className="text-white font-medium">Talent Acquisition & HR roles at Wipro</span>.
+        Check your ATS score, match against real JDs, and get AI-powered feedback —
+        all running privately in your browser.
       </p>
 
       {/* Stats row */}

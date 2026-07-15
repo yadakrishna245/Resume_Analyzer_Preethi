@@ -24,6 +24,11 @@ import { parseResume, validateFile } from '../engine/resumeParser.js';
 // ============================================
 const ENGINE_ROLES = getAvailableRoles();
 
+// HR/TA roles get priority placement at the top
+const HR_TA_SLUGS = ['talent-acquisition', 'hr-recruiter'];
+const HR_ROLES = ENGINE_ROLES.filter(r => HR_TA_SLUGS.includes(r.slug));
+const TECH_ROLES = ENGINE_ROLES.filter(r => !HR_TA_SLUGS.includes(r.slug));
+
 // Additional common roles (without keyword matching but still usable)
 const ADDITIONAL_ROLES = [
   'Software Engineer',
@@ -41,9 +46,11 @@ const ADDITIONAL_ROLES = [
   'Technical Writer',
 ];
 
-// Combine engine roles (primary, with full scoring) and additional roles
+// Combine: HR/TA roles first (primary), then tech engine roles, then additional
 const ALL_ROLES = [
-  ...ENGINE_ROLES.map(r => ({ value: r.slug, label: r.title, hasKeywords: true })),
+  ...HR_ROLES.map(r => ({ value: r.slug, label: `⭐ ${r.title}`, hasKeywords: true })),
+  { value: 'divider-hr', label: '── Tech Roles (full scoring) ──', disabled: true },
+  ...TECH_ROLES.map(r => ({ value: r.slug, label: r.title, hasKeywords: true })),
   { value: 'divider', label: '── Other Roles (basic scoring) ──', disabled: true },
   ...ADDITIONAL_ROLES.map(r => ({ value: r.toLowerCase().replace(/\s+/g, '-'), label: r, hasKeywords: false })),
 ];

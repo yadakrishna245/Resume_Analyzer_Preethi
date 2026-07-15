@@ -45,7 +45,15 @@ const ACTION_VERBS = [
   'performed', 'planned', 'provisioned', 'reduced', 'refactored',
   'resolved', 'scaled', 'secured', 'simplified', 'spearheaded',
   'streamlined', 'supervised', 'supported', 'transformed', 'troubleshot',
-  'upgraded', 'utilized'
+  'upgraded', 'utilized',
+  // HR / Talent Acquisition action verbs
+  'recruited', 'sourced', 'screened', 'interviewed', 'onboarded',
+  'coordinated', 'facilitated', 'trained', 'mentored', 'counseled',
+  'negotiated', 'partnered', 'collaborated', 'engaged', 'retained',
+  'assessed', 'evaluated', 'shortlisted', 'scheduled', 'conducted',
+  'organized', 'processed', 'verified', 'documented', 'communicated',
+  'aligned', 'advised', 'influenced', 'advocated', 'championed',
+  'initiated', 'drove', 'ensured', 'maintained', 'fostered'
 ];
 
 /**
