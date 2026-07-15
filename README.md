@@ -371,8 +371,8 @@ The `deploy.ps1` PowerShell script automates the entire deployment process.
 
 ```powershell
 # Clone the repository
-git clone https://github.com/krishna-yada/nexucv.git
-cd nexucv
+git clone https://github.com/yadakrishna245/Resume_Analyzer_Preethi.git
+cd Resume_Analyzer_Preethi
 
 # Run the deployment script
 .\deploy.ps1
@@ -779,7 +779,7 @@ This project is licensed under the **MIT License** — see the [LICENSE](LICENSE
 ```
 MIT License
 
-Copyright (c) 2025 Krishna Yada
+Copyright (c) 2025 Preethi Prasanna
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -798,15 +798,15 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
 
 ---
 
-## 👨‍💻 Author
+## 👩‍💻 Author
 
 <div align="center">
 
-**Krishna Yada**
+**Preethi Prasanna**
 
-[![GitHub](https://img.shields.io/badge/GitHub-krishna--yada-181717?style=for-the-badge&logo=github)](https://github.com/krishna-yada)
+[![GitHub](https://img.shields.io/badge/GitHub-yadakrishna245-181717?style=for-the-badge&logo=github)](https://github.com/yadakrishna245)
 
-Built with ❤️ using React, AWS, and AI
+Developed by Preethi | Built with ❤️ using React, AWS, and AI
 
 *If this project helped you, consider giving it a ⭐!*
 

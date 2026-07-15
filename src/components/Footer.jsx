@@ -48,7 +48,7 @@ function Footer() {
 
           {/* Bottom line */}
           <div className="mt-6 pt-4 border-t border-navy-600/40 text-center text-xs text-gray-600">
-            AI feedback is guidance, not a guarantee — always review suggestions before applying them.
+            Developed by Preethi | AI feedback is guidance, not a guarantee — always review suggestions before applying them.
           </div>
         </div>
       </div>
